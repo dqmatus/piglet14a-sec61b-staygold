@@ -1,5 +1,7 @@
 # EF1A promoter-length comparison at pIGLET14a (StayGold–Sec61β)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21520506.svg)](https://doi.org/10.5281/zenodo.21520506)
+
 Single-channel confocal quantification comparing two lengths of the zebrafish
 **EF1A (`eef1a1l1`) promoter** — **2.2 kb** vs **2.6 kb** — driving an
 ER-membrane reporter, **monomeric StayGold fused to Sec61β**, from the
@@ -76,11 +78,13 @@ and run all cells.
 
 ## Data availability
 
-The raw confocal ND2 z-stacks are not tracked in git (size). They are available
-at **[deposit DOI / repository — to be added]** and support full reproduction,
-including the representative image panels. The committed per-fish measurement
-tables are sufficient to reproduce all reported statistics and the quantification
-plot.
+The raw confocal ND2 z-stacks are not tracked in git (size). They are archived on
+Zenodo at **[https://doi.org/10.5281/zenodo.21520506](https://doi.org/10.5281/zenodo.21520506)**
+(DOI: `10.5281/zenodo.21520506`) and support full reproduction, including the
+representative image panels — extract the archive as `raw_data/` (the folder names
+match what the notebook expects). The committed per-fish measurement tables are
+sufficient to reproduce all reported statistics and the quantification plot without
+the raw data.
 
 ## License
 
