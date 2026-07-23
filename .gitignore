@@ -1,0 +1,13 @@
+# Raw microscopy data (large; deposited separately)
+raw_data/
+*.nd2
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

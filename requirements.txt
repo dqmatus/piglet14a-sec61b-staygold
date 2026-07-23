@@ -1,0 +1,7 @@
+nd2
+numpy
+matplotlib
+pandas
+scipy
+scikit-image
+jupyterlab
