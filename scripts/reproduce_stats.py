@@ -13,6 +13,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
+from scipy.optimize import brentq
+
+# Pre-specified equivalence margin (two one-sided tests). Choose on biological
+# grounds -- the largest difference that would be considered negligible -- NOT to
+# obtain significance. Expressed as a percentage of the 2.2 kb reference mean.
+EQUIV_MARGIN_PCT = 20.0
 
 plt.rcParams['pdf.fonttype'] = 42          # Illustrator-editable text
 plt.rcParams['ps.fonttype'] = 42
@@ -47,6 +53,39 @@ print(f"  fold (2.6/2.2) = {b.mean() / a.mean():.2f}x")
 print(f"  Mann-Whitney U = {u:.1f}, p = {p:.3f}")
 print(f"  Welch t-test   t = {t:.2f}, p = {pt:.3f}")
 print(f"  Cohen's d      = {d:.2f}")
+
+# --- Equivalence (TOST / 90% CI of the difference) and power ---
+# A non-significant difference is not evidence of equivalence. Two one-sided tests
+# (TOST) at alpha=0.05 are equivalent to checking that the 90% CI of the difference
+# lies entirely within the pre-specified margin.
+sp = np.sqrt(((len(a) - 1) * a.std(ddof=1) ** 2 + (len(b) - 1) * b.std(ddof=1) ** 2)
+             / (len(a) + len(b) - 2))
+se = sp * np.sqrt(1 / len(a) + 1 / len(b))
+dfree = len(a) + len(b) - 2
+diff = b.mean() - a.mean()
+ref = a.mean()                                   # express relative to the 2.2 kb mean
+tcrit90 = stats.t.ppf(0.95, dfree)               # 90% CI <-> TOST at alpha = 0.05
+ci_lo, ci_hi = diff - tcrit90 * se, diff + tcrit90 * se
+margin = EQUIV_MARGIN_PCT / 100 * ref
+p_tost = max(stats.t.sf((diff + margin) / se, dfree), stats.t.cdf((diff - margin) / se, dfree))
+
+
+def _power(dd):
+    ncp = abs(dd) * np.sqrt(len(a) * len(b) / (len(a) + len(b)))
+    tc = stats.t.ppf(0.975, dfree)
+    return float(1 - stats.nct.cdf(tc, dfree, ncp) + stats.nct.cdf(-tc, dfree, ncp))
+
+
+mde = brentq(lambda x: _power(x) - 0.80, 0.05, 1.4)
+print("\nequivalence / power:")
+print(f"  difference (2.6-2.2) = {diff:+.1f} A.U. ({diff / ref * 100:+.1f}%)")
+print(f"  90% CI of difference = [{ci_lo:+.1f}, {ci_hi:+.1f}] A.U. "
+      f"= [{ci_lo / ref * 100:+.1f}%, {ci_hi / ref * 100:+.1f}%]")
+print(f"  TOST equivalence within +/-{EQUIV_MARGIN_PCT:.0f}%: p = {p_tost:.3f} "
+      f"-> {'EQUIVALENT' if p_tost < 0.05 else 'not shown'}")
+print(f"  achieved power (observed d={d:.2f}) = {_power(d) * 100:.0f}%; "
+      f"min. detectable difference at 80% power = {mde * sp:.0f} A.U. ({mde * sp / ref * 100:.0f}%)")
+
 sig = 'n.s.' if p >= 0.05 else (f'p = {p:.3f}' if p >= 1e-3 else f'p = {p:.1e}')
 
 # --- violin ---
